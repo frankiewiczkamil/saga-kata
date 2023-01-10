@@ -1,32 +1,27 @@
-import { createStore, applyMiddleware } from 'npm:redux'
-import createSagaMiddleware from 'npm:redux-saga'
-import { takeEvery } from 'npm:redux-saga/effects'
+import { Action, applyMiddleware, createStore, Store } from "npm:redux";
+import createSagaMiddleware, { SagaMiddleware } from "npm:redux-saga";
 
-const ACTION = { type: 'RUN' }
-const initialState = {
-    counter: 0
-}
-function reducer(state = initialState, action) {
-    console.log('received action', action);
-    if (action.type === ACTION.type) {
-        state = { counter: state.counter + 1 }
-    }
-    return state
+export const ACTION = { type: "RUN" };
+const defaultInitialState = {
+  counter: 0,
+};
+function defaultReducer(state = defaultInitialState, action: Action) {
+  console.log("received action", action);
+  if (action.type === ACTION.type) {
+    state = { counter: state.counter + 1 };
+  }
+  return state;
 }
 
-const sagaMiddleware = createSagaMiddleware()
-const store = createStore(
+export function init(reducer = defaultReducer) {
+  const sagaMiddleware: SagaMiddleware = createSagaMiddleware();
+  const store: Store = createStore(
     reducer,
-    applyMiddleware(sagaMiddleware)
-)
-function* handler() {
-    console.log('run saga')
+    applyMiddleware(sagaMiddleware),
+  );
+
+  return {
+    addSaga: (saga: SagaMiddleware) => sagaMiddleware.run(saga),
+    store,
+  };
 }
-function* mainSaga() {
-    yield takeEvery(ACTION.type, handler);
-}
-sagaMiddleware.run(mainSaga);
-
-store.dispatch(ACTION)
-
-
